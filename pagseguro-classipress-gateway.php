@@ -157,12 +157,19 @@ function pagseguro_create_payment_listener() {
 
 		switch ( $status ) {
 			case 3:
-				if ( $order->get_status() == 'tr_activated' ) {
+				if ( $order->get_status() == 'tr_activated' || $order->get_status() == 'tr_completed' ) {
 					pagseguro_log( 'Notificação repetida para ' . $transaction->reference . '. Ignorando...' );
 
 					return;
 				}
-				$order->activate();
+
+                                global $cp_options;
+                                if ( $cp_options->moderate_ads ) {
+                                        $order->complete();
+                                }else{
+                                        $order->activate();
+                                }
+
 				pagseguro_log( 'Pedido ' . $transaction->reference . ' foi ativado');
 				break;
 			case 7:
